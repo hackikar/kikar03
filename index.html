@@ -37,14 +37,28 @@
   <div class="mdl-card__supporting-text">
 {{owner_extra_info.full_name_display}}
   </div>
-  <div class="mdl-card__actions mdl-card--border">
-    <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+  <div id="join_{{id}}" class="mdl-card__actions mdl-card--border">
+    <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+       onclick="joinIdea({{id}})">
       כנסו
     </a>
   </div>
 </div>
 </script>
 <script>
+var token;
+
+function joinIdea(id) {
+  $.ajax({
+    method: "POST",
+    url: "http://localhost:8000/api/v1/userstories/"+id+"/watch",
+    headers: {Authorization: "Bearer "+token},
+    complete: function (data, status) {
+        console.log(status);
+        $('#join_'+id).text('כנסו');
+    }
+  });
+};
 $(document).ready(function () {
   var template = $('#idea-template').html();
   Mustache.parse(template);   // optional, speeds up future uses
@@ -59,7 +73,7 @@ $(document).ready(function () {
           }),
     processData: false,
     complete: function (response, status) {
-      var token = response.responseJSON.auth_token;
+      token = response.responseJSON.auth_token;
       $.ajax({
         method: "GET",
         url: "http://localhost:8000/api/v1/userstories?project=8",
