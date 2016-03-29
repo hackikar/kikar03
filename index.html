@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <link rel="stylesheet" href="css/material.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/material.min.js"></script>
+    <script src="js/mustache.min.js"></script>
+<!--
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/icon?family=Material+Icons">
+-->
+  </head>
+  <body dir="rtl" lang="he">
+<!-- Square card -->
+<style>
+#ideas { margin: 0.5em auto; width: 320px; }
+.demo-card-square.mdl-card {
+  width: 320px;
+  height: 320px;
+  margin-bottom: 0.5em;
+}
+.demo-card-square > .mdl-card__title {
+  color: #fff;
+  background:
+    url('../assets/demos/dog.png') bottom right 15% no-repeat #46B6AC;
+}
+</style>
+
+<div id="ideas">
+</div>
+
+<script id="idea-template" type="x-tmpl-mustache">
+<div class="demo-card-square mdl-card mdl-shadow--2dp">
+  <div class="mdl-card__title mdl-card--expand">
+    <h2 class="mdl-card__title-text">{{subject}}</h2>
+  </div>
+  <div class="mdl-card__supporting-text">
+{{owner_extra_info.full_name_display}}
+  </div>
+  <div class="mdl-card__actions mdl-card--border">
+    <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+      כנסו
+    </a>
+  </div>
+</div>
+</script>
+<script>
+$(document).ready(function () {
+  var template = $('#idea-template').html();
+  Mustache.parse(template);   // optional, speeds up future uses
+  $.ajax({
+    method: "POST",
+    url: "http://localhost:8000/api/v1/auth",
+    contentType: 'application/json; charset=UTF-8',
+    dataType: "json",
+    data: JSON.stringify({type:"normal",
+           username: "admin",
+           password: "123123"
+          }),
+    processData: false,
+    complete: function (response, status) {
+      var token = response.responseJSON.auth_token;
+      $.ajax({
+        method: "GET",
+        url: "http://localhost:8000/api/v1/userstories?project=8",
+        headers: {Authorization: "Bearer "+token},
+        complete: function (data, status) {
+          var ideas = data.responseJSON;
+          ideas.forEach(function (idea) {
+            var card = Mustache.render(template, idea)
+            console.log(idea);
+            $(card).appendTo('#ideas');
+          });
+        }
+      })
+    }
+  })
+});
+</script>
+  </body>
+</html>
